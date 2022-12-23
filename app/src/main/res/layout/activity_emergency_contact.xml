@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".EmergencyContact"
+    android:background="#51A0A1"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:id="@+id/line1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#62B6B7"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+        <EditText
+            android:id="@+id/Name_Edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name"
+            android:padding="5dp"
+            android:textColorHint="#56FFFFFF"></EditText>
+
+        <EditText
+            android:id="@+id/Number_Edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="01**********"
+            android:padding="5dp"
+            android:text=""
+            android:textColorHint="#56FFFFFF"></EditText>
+
+        <Button
+            android:id="@+id/addContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/white"
+            android:padding="5dp"
+            android:text="Add Contact"
+            android:textColor="@color/purple_700"
+            app:cornerRadius="50px"></Button>
+
+    </LinearLayout>
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_below="@+id/line1"
+    android:layout_marginTop="25dp"
+    >
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/Recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints"></androidx.recyclerview.widget.RecyclerView>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>
