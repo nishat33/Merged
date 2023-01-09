@@ -71,6 +71,7 @@ public class Maps extends FragmentActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        instruction();
         //mMap.getUiSettings().setAllGesturesEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
@@ -123,14 +124,20 @@ public class Maps extends FragmentActivity implements OnMapReadyCallback,
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             bulidGoogleApiClient();
+          //  Toast.makeText(getApplicationContext(),"hoise",Toast.LENGTH_LONG).show();
 
             mMap.setMyLocationEnabled(true);
         }
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
+                if (textToSpeech != null) {
+                    textToSpeech.shutdown();
+                }
                 String markerName = marker.getTitle();
                 Toast.makeText(Maps.this, "Clicked location is " + markerName, Toast.LENGTH_SHORT).show();
+
+
                 textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                     @Override
                     public void onInit(int i) {
@@ -141,6 +148,7 @@ public class Maps extends FragmentActivity implements OnMapReadyCallback,
                         }
                     }
                 });
+
                 return false;
             }
         });
@@ -312,8 +320,10 @@ public class Maps extends FragmentActivity implements OnMapReadyCallback,
             return false;
 
         }
-        else
+        else {
+         //   Toast.makeText(getApplicationContext(),"hoise",Toast.LENGTH_LONG).show();
             return true;
+        }
     }
 
 
@@ -359,15 +369,95 @@ public class Maps extends FragmentActivity implements OnMapReadyCallback,
         GetNearbyPlacesData getNearbyPlacesData = new GetNearbyPlacesData();
         if (requestCode == 1 && resultCode == RESULT_OK && data !=null){
             ArrayList<String> arrayList = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            if (arrayList.get(0).toString().equals("Hospital")){
+            if (arrayList.get(0).toString().toLowerCase().equals("hospital")){
                 String hospital = "hospital";
                 String url = getUrl(latitude, longitude, hospital);
                 dataTransfer[0] = mMap;
                 dataTransfer[1] = url;
                 getNearbyPlacesData.execute(dataTransfer);
             }
+            else if (arrayList.get(0).toString().toLowerCase().equals("school")){
+                String hospital = "school";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+            else if (arrayList.get(0).toString().toLowerCase().equals("gas station")){
+                String hospital = "gas_station";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+            else if (arrayList.get(0).toString().toLowerCase().equals("library")){
+                String hospital = "library";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+            else if (arrayList.get(0).toString().toLowerCase().equals("art gallery")){
+                String hospital = "art_gallery";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+            else if (arrayList.get(0).toString().toLowerCase().equals("police")){
+                String hospital = "police";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+            else if (arrayList.get(0).toString().toLowerCase().equals("electrician")){
+                String hospital = "electrician";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+            else if (arrayList.get(0).toString().toLowerCase().equals("university")){
+                String hospital = "university";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+            else if (arrayList.get(0).toString().toLowerCase().equals("tourist attraction")){
+                String hospital = "tourist_attraction";
+                String url = getUrl(latitude, longitude, hospital);
+                dataTransfer[0] = mMap;
+                dataTransfer[1] = url;
+                getNearbyPlacesData.execute(dataTransfer);
+            }
+
         }
 
+    }
+
+    private void instruction() {
+        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                if(i==TextToSpeech.SUCCESS){
+                    int lang = textToSpeech.setLanguage(Locale.ENGLISH);
+                    String s = "press volume buttom to open voice command, and speak the keyword to search.";
+
+                    textToSpeech.setSpeechRate(1.0f);
+                    int speech = textToSpeech.speak(s,TextToSpeech.QUEUE_FLUSH,null);
+                }
+            }
+        });
+    };
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (textToSpeech != null) {
+            textToSpeech.shutdown();
+        }
     }
 
 }

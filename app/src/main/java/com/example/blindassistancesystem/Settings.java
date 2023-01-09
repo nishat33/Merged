@@ -2,7 +2,9 @@ package com.example.blindassistancesystem;
 
 //import static com.example.blindassistancesystem.Dashboard.ISDISABLE;
 
+import static com.example.blindassistancesystem.Dashboard.CALL_STATIC;
 import static com.example.blindassistancesystem.Dashboard.REQUEST_CODE;
+
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -17,11 +19,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 public class Settings extends AppCompatActivity {
-    RelativeLayout emergency,fontsize;
+    RelativeLayout emergency;
     //Switch aSwitch;
     RelativeLayout font;
 
     SwitchCompat switchCompat;
+    SwitchCompat callSwitchCompat;
     ImageButton imageButton;
 
 
@@ -30,19 +33,12 @@ public class Settings extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-     //   imageButton=findViewById(R.id.back_to_home);
-
-
-        fontsize=(RelativeLayout) findViewById(R.id.FontSize);
-        fontsize.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Settings.this, Fontsize.class);
-                startActivity(intent);
-            }
-        });
 
         switchCompat=findViewById(R.id.SoundSwitch);
+        callSwitchCompat=findViewById(R.id.Calling);
+        SharedPreferences sharedPreferences2=getSharedPreferences("callsave",MODE_PRIVATE);
+        callSwitchCompat.setChecked(sharedPreferences2.getBoolean("callvalue",true));
+
         SharedPreferences sharedPreferences=getSharedPreferences("save",MODE_PRIVATE);
         switchCompat.setChecked(sharedPreferences.getBoolean("value",true));
         emergency=(RelativeLayout)findViewById(R.id.EmergencyCont);
@@ -54,20 +50,7 @@ public class Settings extends AppCompatActivity {
             }
         });
 
-        //aSwitch=(Switch)findViewById(R.id.SoundSwitch);
-//        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-//                if(b){
-//                    REQUEST_CODE = -1;
-//                    aSwitch.setClickable(false);
-//                }
-//                else{
-//                    REQUEST_CODE=1;
-//                    aSwitch.setClickable(true);
-//                }
-//            }
-//        });
+
 
         switchCompat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,8 +77,36 @@ public class Settings extends AppCompatActivity {
         }
         );
 
+        callSwitchCompat.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                if (callSwitchCompat.isChecked())
+                {
+                    // When switch checked
+                    CALL_STATIC = -1;
+                    SharedPreferences.Editor editor=getSharedPreferences("callsave",MODE_PRIVATE).edit();
+                    editor.putBoolean("callvalue",true);
+                    editor.apply();
+                    callSwitchCompat.setChecked(true);
+                }
+                else
+                {
+                    // When switch uncheckeds
+                    CALL_STATIC=1;
+                    SharedPreferences.Editor editor=getSharedPreferences("callsave",MODE_PRIVATE).edit();
+                    editor.putBoolean("callvalue",false);
+                    editor.apply();
+                    callSwitchCompat.setChecked(false);
+                }
+            }
+        });
+
+
+
 
     }
+
 
 
 }

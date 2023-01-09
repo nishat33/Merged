@@ -1,8 +1,12 @@
 package com.example.blindassistancesystem;
 
+import static com.example.blindassistancesystem.Dashboard.REQUEST_CODE;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -61,6 +65,10 @@ public class EmergencyContact extends AppCompatActivity {
 
         setContact();
         setAdapter();
+        Toast.makeText(getApplicationContext(),"code is "+REQUEST_CODE,Toast.LENGTH_LONG).show();
+        if(REQUEST_CODE==1) {
+            instruction();
+        }
         addButton = (Button) findViewById(R.id.addContact);
         recyclerAdapter = new RecyclerAdapter(contacts);
 
@@ -74,7 +82,6 @@ public class EmergencyContact extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View view) {
-
                 name = NameText.getText().toString();
                 number = NumberText.getText().toString();
                 int NameLen = name.length();
@@ -140,6 +147,7 @@ public class EmergencyContact extends AppCompatActivity {
                     Toast.makeText(EmergencyContact.this, String.valueOf(contacts.size()), Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(EmergencyContact.this, EmergencyContact.class);
                     startActivity(intent);
+                    finish();
                     ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
                     itemTouchHelper.attachToRecyclerView(recycler);
                 }
@@ -167,33 +175,6 @@ public class EmergencyContact extends AppCompatActivity {
 
         }
     };
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-
-        gestureDetector.onTouchEvent(event);
-        switch (event.getAction()){
-
-            case MotionEvent.ACTION_DOWN:
-                x1=event.getX();
-                y1=event.getY();
-                break;
-            case MotionEvent.ACTION_UP:
-                x2= event.getX();
-                y2= event.getY();
-
-                float valueX= x2-x1;
-                float valueY=y2-y1;
-                if(Math.abs(valueY)>MIN_DISTANCE) {
-                    if(y1<y2){
-                        voiceautomation();
-                    }
-                    else{
-
-                    }
-                }
-        }
-        return super.onTouchEvent(event);
-    }
 
     private void setContact() {
 
@@ -225,7 +206,11 @@ public class EmergencyContact extends AppCompatActivity {
         return true;
     }
 
+
     private void voiceautomation() {
+        if (textToSpeech != null) {
+            textToSpeech.shutdown();
+        }
         Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -239,18 +224,29 @@ public class EmergencyContact extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             ArrayList<String> arrayList = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            if(arrayList.get(0).toString().toLowerCase().equals("name")){
+            if(arrayList.get(0).toString().toLowerCase().equals("add name")){
                 getName();
-              InName  = arrayList.get(0).toString().toLowerCase();
-                Toast.makeText(EmergencyContact.this,InName,Toast.LENGTH_LONG).show();
 
             }
-            else if(arrayList.get(0).toString().toLowerCase().equals("number")){
+            else if(arrayList.get(0).toString().toLowerCase().equals("add number")){
                 getNumber();
-               InNumber  = arrayList.get(0).toString().toLowerCase().replaceAll("\\s", "");
-               Toast.makeText(EmergencyContact.this,InNumber,Toast.LENGTH_LONG).show();
+
             }
-            else if(arrayList.get(0).toString().toLowerCase().equals("add")){
+
+            else if(arrayList.get(0).toString().toLowerCase().equals("add contact")){
+                textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int i) {
+                        if(i==TextToSpeech.SUCCESS){
+                            int lang = textToSpeech.setLanguage(Locale.ENGLISH);
+                            String s = "The name is : "+InName+"\\n"+
+                                    "The number is: "+InNumber;
+
+                            textToSpeech.setSpeechRate(1.0f);
+                            int speech = textToSpeech.speak(s,TextToSpeech.QUEUE_FLUSH,null);
+                        }
+                    }
+                });
                 int NameLen = InName.length();
                 int NumberLen = InNumber.length();
                 boolean bool = onlyDigits(InNumber, NumberLen);
@@ -318,31 +314,68 @@ public class EmergencyContact extends AppCompatActivity {
                     itemTouchHelper.attachToRecyclerView(recycler);
                 }
             }
+            else if(arrayList.get(0).toString().toLowerCase().equals("delete"))
+            {
+                DatabaseHelper databaseHelper = new DatabaseHelper(getApplicationContext());
+                contacts = databaseHelper.fetchAlldata();
+                int l=contacts.size();
+                Toast.makeText(getApplicationContext(),"size is" + l,Toast.LENGTH_LONG).show();
+                if(l==0)
+                {
+
+                }
+                else
+                {
+                    String name=contacts.get(l-1).name.toString();
+                    String number=contacts.get(l-1).number.toString();
+                    databaseHelper.DeleteData(name,number);
+                    Toast.makeText(getApplicationContext(),name,Toast.LENGTH_LONG).show();
+
+                    Intent intent = new Intent(EmergencyContact.this,EmergencyContact.class);
+                    startActivity(intent);
+                    finish();
+                }
+
+            }
 
 
 
         }
-    }
-    private void getName() {
-        Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
-                Locale.getDefault());
-        voice.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                "The Name: ");
-        startActivityForResult(voice, 1);
+        else if (requestCode == 2 && resultCode == RESULT_OK && data != null) {
+            ArrayList<String> arrayName = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                InName = arrayName.get(0).toString().toLowerCase().replaceAll("\\s", "");
+                Toast.makeText(EmergencyContact.this, InName, Toast.LENGTH_LONG).show();
+        }
+        else if (requestCode == 3 && resultCode == RESULT_OK && data != null) {
+            ArrayList<String> arrayNumber = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            InNumber = arrayNumber.get(0).toString().toLowerCase().replaceAll("\\s", "");
+            Toast.makeText(EmergencyContact.this, InNumber, Toast.LENGTH_LONG).show();
+        }
+
     }
 
     private void getNumber() {
-        Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+
+        Intent number = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        number.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        voice.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
+        number.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
                 Locale.getDefault());
-        voice.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                "The Number: ");
-        startActivityForResult(voice, 1);
+        number.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                "Enter a Number");
+        startActivityForResult(number, 3);
+    }
+
+    private void getName() {
+
+        Intent name = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        name.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        name.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
+                Locale.getDefault());
+        name.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                "Enter a Name: ");
+        startActivityForResult(name, 2);
     }
 
     @SuppressLint("RestrictedApi")
@@ -352,15 +385,38 @@ public class EmergencyContact extends AppCompatActivity {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 voiceautomation();
-                return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 voiceautomation();
-                return true;
             default:
                 return super.dispatchKeyEvent(event);
         }
     }
 
+    private void instruction() {
+        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                if(i==TextToSpeech.SUCCESS){
+                    int lang = textToSpeech.setLanguage(Locale.ENGLISH);
+                    String s = "Press volume down button to open voice command." +
+                            "speak 'add name' to insert a name, and 'add number' to insert a number." +
+                            "then speak 'add contact' to finally add the contact";
+
+                    textToSpeech.setSpeechRate(1.0f);
+                    int speech = textToSpeech.speak(s,TextToSpeech.QUEUE_FLUSH,null);
+                }
+            }
+        });
+    };
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (textToSpeech != null) {
+            textToSpeech.shutdown();
+        }
+    }
 
 
 }

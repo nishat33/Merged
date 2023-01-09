@@ -68,6 +68,7 @@ public class textDetection extends AppCompatActivity implements GestureDetector.
             public void onClick(View view) {
                 takePicture();
                 textView.setText("");
+                onStop();
             }
         });
 
@@ -75,6 +76,7 @@ public class textDetection extends AppCompatActivity implements GestureDetector.
             @Override
             public void onClick(View view) {
                 detectTextFromImage();
+                onStop();
             }
         });
     }
@@ -219,5 +221,14 @@ public class textDetection extends AppCompatActivity implements GestureDetector.
     @Override
     public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
         return false;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (textToSpeech != null) {
+            textToSpeech.shutdown();
+        }
     }
 }

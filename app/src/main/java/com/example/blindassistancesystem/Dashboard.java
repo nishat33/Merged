@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
@@ -63,7 +62,8 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
 
     private float x1, x2, y1, y2;
     private static int MIN_DISTANCE = 150;
-    public static int REQUEST_CODE;
+    public static int REQUEST_CODE=1;
+    public static int CALL_STATIC=1;
     private GestureDetector gestureDetector;
 
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -74,6 +74,7 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+        Toast.makeText(getApplicationContext(),"Code is" + REQUEST_CODE,Toast.LENGTH_LONG).show();
         if(REQUEST_CODE==1) {
             instruction();
         }
@@ -89,8 +90,7 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
             ActivityCompat.requestPermissions(Dashboard.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 44);
         }
 
-        ActivityCompat.requestPermissions(Dashboard.this, new String[]{Manifest.permission.SEND_SMS},90);
-       ActivityCompat.requestPermissions(Dashboard.this, new String[]{Manifest.permission.CALL_PHONE},100);
+
 
         if (ContextCompat.checkSelfPermission(Dashboard.this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(Dashboard.this, Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(Dashboard.this,
@@ -133,57 +133,50 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
         Call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                  final  Dialog dialog=new Dialog(v.getRootView().getContext());
                  View view = LayoutInflater.from(v.getRootView().getContext()).inflate(R.layout.dialog_box,null);
                  police_line=(Button)view.findViewById(R.id.Police_Line);
                  emergency=(Button)view.findViewById(R.id.EmergencY);
                  healcare=(Button)view.findViewById(R.id.health_care);
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED)
+                {
+                    police_line.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v2) {
+                            String phone_number="01848-391188";
+                            Intent phone_intent = new Intent(Intent.ACTION_CALL);
+                            phone_intent.setData(Uri.parse("tel:" + phone_number));
+                            startActivity(phone_intent);
+                        }
+                    });
+                    emergency.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v2) {
 
-                 police_line.setOnClickListener(new View.OnClickListener() {
-                     @Override
-                     public void onClick(View v2) {
+                            String phone_number="999";
+                            Intent phone_intent = new Intent(Intent.ACTION_CALL);
+                            phone_intent.setData(Uri.parse("tel:" + phone_number));
+                            startActivity(phone_intent);
+                        }
+                    });
+
+                    healcare.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v2) {
+                            String phone_number="01719-506944";
+                            Intent phone_intent = new Intent(Intent.ACTION_CALL);
+                            phone_intent.setData(Uri.parse("tel:" + phone_number));
+                            startActivity(phone_intent);
+                        }
+                    });
+                }
+                else{
+                    ActivityCompat.requestPermissions(Dashboard.this, new String[]{Manifest.permission.CALL_PHONE}, 3);
+                    Toast.makeText(getApplicationContext(),"permission nai",Toast.LENGTH_LONG).show();
+                }
 
 
-                     String phone_number="01848-391188";
-                 Intent phone_intent = new Intent(Intent.ACTION_CALL);
-
-            // Set data of Intent through Uri by parsing phone number
-            phone_intent.setData(Uri.parse("tel:" + phone_number));
-
-            // start Intent 01848-391188
-            startActivity(phone_intent);
-
-                     }
-                 });
-
-                 emergency.setOnClickListener(new View.OnClickListener() {
-                     @Override
-                     public void onClick(View v2) {
-
-                     String phone_number="999";
-                 Intent phone_intent = new Intent(Intent.ACTION_CALL);
-
-            // Set data of Intent through Uri by parsing phone number
-            phone_intent.setData(Uri.parse("tel:" + phone_number));
-
-            // start Intent 01848-391188
-            startActivity(phone_intent);
-                     }
-                 });
-
-                 healcare.setOnClickListener(new View.OnClickListener() {
-                     @Override
-                     public void onClick(View v2) {
-                                              String phone_number="01719-506944";
-                 Intent phone_intent = new Intent(Intent.ACTION_CALL);
-
-            // Set data of Intent through Uri by parsing phone number
-            phone_intent.setData(Uri.parse("tel:" + phone_number));
-
-            // start Intent 01848-391188
-            startActivity(phone_intent);
-                     }
-                 });
 
 
                   dialog.setContentView(view);
@@ -215,7 +208,8 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
         object_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               Intent intent=getPackageManager().getLaunchIntentForPackage("com.example.imagepro");
+               //Intent intent=getPackageManager().getLaunchIntentForPackage("com.example.imagepro");
+                Intent intent=new Intent(Dashboard.this,MainActivity2.class);
                 startActivity(intent);
             }
         });
@@ -261,36 +255,28 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
         });
         Emergency = (ImageButton) findViewById(R.id.AlertButton);
 
-        //address = (TextView) findViewById(R.id.address);
-
-
         Emergency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               /// sendtext();
-                DatabaseHelper helper = new DatabaseHelper(getApplicationContext());
 
 
-                ArrayList<Contact>x=helper.fetchAlldata();
-                 String num=helper.getNumber().toString();
 
-                 if(num.equals("Nothing"))
-                 {
-                     Toast.makeText(getApplicationContext(),"Please Enter Emergency Contact",Toast.LENGTH_LONG).show();
-                 }
+                sendtext();
+                DatabaseHelper databaseHelper=new DatabaseHelper(getApplicationContext());
 
-                 else
-                 {
-                     String phone_number=num;
-                     sendtext(num);
-                 Intent phone_intent = new Intent(Intent.ACTION_CALL);
+                ArrayList<Contact> arrayList=databaseHelper.fetchAlldata();
+                String phone_number=arrayList.get(0).getNumber();
+                Intent phone_intent = new Intent(Intent.ACTION_CALL);
+                phone_intent.setData(Uri.parse("tel:" + phone_number));
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED)
+                {
+                    startActivity(phone_intent);
+                }
+                else{
+                    ActivityCompat.requestPermissions(Dashboard.this, new String[]{Manifest.permission.CALL_PHONE}, 3);
+                    Toast.makeText(getApplicationContext(),"permission nai",Toast.LENGTH_LONG).show();
+                }
 
-            // Set data of Intent through Uri by parsing phone number
-            phone_intent.setData(Uri.parse("tel:" + phone_number));
-
-            // start Intent
-            startActivity(phone_intent);
-                 }
 
             }
         });
@@ -318,22 +304,48 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
 
 
 
-    private void sendtext(String num) {
+    private void sendtext() {
 
-            String Mobile=num;
+
+
+//        String Mobile="01714766854";
+        DatabaseHelper databaseHelper=new DatabaseHelper(getApplicationContext());
+
+        ArrayList<Contact> arrayList=databaseHelper.fetchAlldata();
+
+        Integer size=arrayList.size();
+
+        for(int i=0;i<size;i++){
+
+            String Mobile=arrayList.get(i).getNumber();
             Toast.makeText(Dashboard.this,Mobile,Toast.LENGTH_LONG).show();
             String text = message;
-
-            Intent intent = new Intent(getApplicationContext(), Dashboard.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-            SmsManager smsManager = SmsManager.getDefault();
-            if (ActivityCompat.checkSelfPermission(Dashboard.this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
-                smsManager.sendTextMessage(Mobile, null, text, pendingIntent, null);
-                Toast.makeText(Dashboard.this, "Message sent", Toast.LENGTH_LONG).show();
-
-            } else {
-                Toast.makeText(Dashboard.this, "Nope", Toast.LENGTH_LONG).show();
+            try {
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage(Mobile, null, text, null, null);
+                Toast.makeText(getApplicationContext(), "Message Sent",
+                        Toast.LENGTH_LONG).show();
             }
+            catch (Exception e){
+                Toast.makeText(getApplicationContext(),e.getMessage().toString(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+        }
+
+
+//        Intent intent = new Intent(getApplicationContext(), Dashboard.class);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+//        SmsManager smsManager = SmsManager.getDefault();
+//        if (ActivityCompat.checkSelfPermission(Dashboard.this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+//            smsManager.sendTextMessage(Mobile, null, text, pendingIntent, null);
+//            Toast.makeText(Dashboard.this, "Message sent", Toast.LENGTH_LONG).show();
+//        } else {
+//            ActivityCompat.requestPermissions(Dashboard.this, new String[]{Manifest.permission.SEND_SMS},90);
+//            Toast.makeText(Dashboard.this, "permission nai", Toast.LENGTH_LONG).show();
+//        }
+
+
+
     }
 
     @SuppressLint("MissingPermission")
@@ -384,6 +396,9 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
                     float valueY=y2-y1;
                     if(Math.abs(valueY)>MIN_DISTANCE) {
                         if(y1>y2){
+                            if (textToSpeech != null) {
+                                textToSpeech.shutdown();
+                            }
                             voiceautomation();
                         }
                         else{
@@ -392,10 +407,18 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
                                 public void onInit(int i) {
                                     if(i==TextToSpeech.SUCCESS){
                                         int lang = textToSpeech.setLanguage(Locale.ENGLISH);
-                                        String s = "Welcome to \"Third Eye\". Swipe up to open voice command and " +
+                                        String s = "Welcome to 'Third Eye'. Swipe up to open voice command and " +
                                                 "speak \"read\" to scan and read aloud a text. "+
                                                 "speak \"text\" to read the unread messages. "+
-                                                "speak \"location\" to learn your current location. ";
+                                                "speak \"location\" to learn your current location. " +
+                                                "speak \"maps\" to open google maps." +
+                                                "speak \"settings\" to open settings." +
+                                                "speak 'notification' to learn total unread texts. " +
+                                                "speak 'emergency contact' to go to emergency contact" +
+                                                "speak 'help' to send your location to your emergency contact." +
+                                                "speak 'police' to call police line." +
+                                                "speak 'emergency helpline' to call 999." +
+                                                "speak 'healthcare' to call healthcare service.";
 
                                         textToSpeech.setSpeechRate(1.0f);
                                         int speech = textToSpeech.speak(s,TextToSpeech.QUEUE_FLUSH,null);
@@ -485,7 +508,7 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
                 else
                 {
                     String phone_number=num;
-                    sendtext(num);
+                    sendtext();
                     Intent phone_intent = new Intent(Intent.ACTION_CALL);
 
                     // Set data of Intent through Uri by parsing phone number
@@ -496,18 +519,18 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
                 }
             }
 
-               else if (arrayList.get(0).toString().equals("location")){
+             else if (arrayList.get(0).toString().equals("location")){
                 Toast.makeText(getApplicationContext(), cur_loc, Toast.LENGTH_LONG).show();
                  textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int i) {
-                if(i==TextToSpeech.SUCCESS){
-                    int lang = textToSpeech.setLanguage(Locale.ENGLISH);
-                    textToSpeech.setSpeechRate(1.0f);
-                    int speech = textToSpeech.speak(cur_loc,TextToSpeech.QUEUE_FLUSH,null);
-                }
-            }
-        });
+                @Override
+                    public void onInit(int i) {
+                        if(i==TextToSpeech.SUCCESS){
+                            int lang = textToSpeech.setLanguage(Locale.ENGLISH);
+                            textToSpeech.setSpeechRate(1.0f);
+                            int speech = textToSpeech.speak(cur_loc,TextToSpeech.QUEUE_FLUSH,null);
+                        }
+                    }
+                });
             }
             else if(arrayList.get(0).toString().toLowerCase().equals("notification"))
             {
@@ -536,30 +559,30 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
                 });
             }
 
-                  else if (arrayList.get(0).toString().toLowerCase().equals("healthcare")){
-                     String phone_number="01719-506944";
+                else if (arrayList.get(0).toString().toLowerCase().equals("healthcare")){
+                String phone_number="01719-506944";
                  Intent phone_intent = new Intent(Intent.ACTION_CALL);
 
-            // Set data of Intent through Uri by parsing phone number
-            phone_intent.setData(Uri.parse("tel:" + phone_number));
+                    // Set data of Intent through Uri by parsing phone number
+                     phone_intent.setData(Uri.parse("tel:" + phone_number));
 
-            // start Intent
-            startActivity(phone_intent);
+                // start Intent
+                startActivity(phone_intent);
             }
 
              else if (arrayList.get(0).toString().toLowerCase().equals("call HealthCare")){
                             String phone_number="01719-506944";
-                 Intent phone_intent = new Intent(Intent.ACTION_CALL);
+                            Intent phone_intent = new Intent(Intent.ACTION_CALL);
 
-            // Set data of Intent through Uri by parsing phone number
-            phone_intent.setData(Uri.parse("tel:" + phone_number));
+                            // Set data of Intent through Uri by parsing phone number
+                            phone_intent.setData(Uri.parse("tel:" + phone_number));
 
-            // start Intent 01848-391188
-            startActivity(phone_intent);
+                             // start Intent 01848-391188
+                            startActivity(phone_intent);
 
             }
 
-                 else if (arrayList.get(0).toString().toLowerCase().equals("police line")){
+                 else if (arrayList.get(0).toString().toLowerCase().equals("call police")){
                      String phone_number="01848-391188";
                  Intent phone_intent = new Intent(Intent.ACTION_CALL);
 
@@ -582,7 +605,7 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
             startActivity(phone_intent);
 
             }
-                             else if (arrayList.get(0).toString().toLowerCase().equals("call emergency helpline")){
+                    else if (arrayList.get(0).toString().toLowerCase().equals("call emergency helpline")){
                      String phone_number="999";
                  Intent phone_intent = new Intent(Intent.ACTION_CALL);
 
@@ -604,13 +627,21 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
             // start Intent 01848-391188
             startActivity(phone_intent);
 
-            }
-                             else if(arrayList.get(0).toString().toLowerCase().equals("maps")){
+            } else if(arrayList.get(0).toString().toLowerCase().equals("maps")){
                                  Intent intent = new Intent(Dashboard.this, Maps.class);
                                  startActivity(intent);
 
 
             }
+             else if(arrayList.get(0).toString().toLowerCase().equals("emergency contact")){
+                Intent intent = new Intent(Dashboard.this, EmergencyContact.class);
+                startActivity(intent);
+            }
+            else if(arrayList.get(0).toString().toLowerCase().equals("object")){
+                Intent intent=getPackageManager().getLaunchIntentForPackage("com.example.imagepro");
+                startActivity(intent);
+            }
+
 
 
 
@@ -652,5 +683,14 @@ public class Dashboard extends AppCompatActivity implements GestureDetector.OnGe
         Toast toast=Toast.makeText(context,message,Toast.LENGTH_LONG);
         toast.setGravity(Gravity.CENTER,0,0);
         toast.show();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (textToSpeech != null) {
+            textToSpeech.shutdown();
+        }
     }
 }

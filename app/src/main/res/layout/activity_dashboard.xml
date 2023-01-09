@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#51A0A1"
-    android:theme="@style/FontSizeMedium"
+
     android:id="@+id/dashboard"
 
     tools:context=".Dashboard">
